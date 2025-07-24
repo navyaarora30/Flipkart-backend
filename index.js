@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 
 const Product = require("./models/Product");
 const { router: authRoutes, authenticateJWT } = require("./auth");
-const cartRoutes = require("./routes/cart"); // ✅ Updated path
+const cartRoutes = require("./cart");
 
 const app = express();
 
