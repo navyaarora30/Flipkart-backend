@@ -1,23 +1,21 @@
-// models/Cart.js
 const mongoose = require("mongoose");
 
 const cartSchema = new mongoose.Schema({
-  title: String,
-  description: String,
-  price: Number,
-  discountPercentage: Number,
-  rating: Number,
-  stock: Number,
-  brand: String,
-  category: String,
-  thumbnail: String,
-  images: [String],
-  productId: Number,
-  quantity: Number,
-  user: Number,
-  id: Number,
+  userId: String,
+  status: {
+    type: String,
+    default: "active",
+  },
+  items: [
+    {
+      productId: String,
+      quantity: Number,
+    },
+  ],
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-const Cart = mongoose.model("Cart", cartSchema);
-
-module.exports = Cart;
+module.exports = mongoose.model("Cart", cartSchema);

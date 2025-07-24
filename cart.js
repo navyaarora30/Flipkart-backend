@@ -1,27 +1,6 @@
-const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
-
-const Cart = mongoose.model(
-  "Cart",
-  new mongoose.Schema({
-    userId: String,
-    status: {
-      type: String,
-      default: "active",
-    },
-    items: [
-      {
-        productId: String,
-        quantity: Number,
-      },
-    ],
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
-  })
-);
+const Cart = require("../models/Cart"); // ✅ Import the model
 
 // POST: Add item to cart
 router.post("/cart/add", async (req, res) => {
