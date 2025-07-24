@@ -9,27 +9,27 @@ const User = mongoose.model(
   new mongoose.Schema({ email: String, password: String })
 );
 
-// Signup
+// Signup route
 router.post("/signup", async (req, res) => {
   const { email, password } = req.body;
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return res.status(400).json({ error: "User already exists" });
   }
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10); // fixed hash
   const user = new User({ email, password: hashedPassword });
   await user.save();
   const token = jwt.sign({ userId: user._id }, "secret", { expiresIn: "1h" });
   res.status(200).json({ token });
 });
 
-// Login
+// Login route
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (user && (await bcrypt.compare(password, user.password))) {
     const token = jwt.sign({ userId: user._id }, "secret", { expiresIn: "1h" });
-    return res.status(200).json({ token });
+    res.status(200).json({ token });
   } else {
     res.status(400).json({ error: "Invalid credentials" });
   }
@@ -41,9 +41,7 @@ function authenticateJWT(req, res, next) {
   if (authHeader) {
     const token = authHeader.split(" ")[1];
     jwt.verify(token, "secret", (err, user) => {
-      if (err) {
-        return res.sendStatus(403);
-      }
+      if (err) return res.sendStatus(403);
       req.user = user;
       next();
     });
