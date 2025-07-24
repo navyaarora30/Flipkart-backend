@@ -4,7 +4,9 @@ const fs = require("fs");
 
 // 1. Connect to MongoDB
 mongoose
-  .connect("mongodb+srv://NavyaArora:deploy30Project09Mongo@cluster0.tpmk9y3.mongodb.net/flipkart-db")
+  .connect(
+    "mongodb+srv://NavyaArora:deploy30Project09Mongo@cluster0.tpmk9y3.mongodb.net/flipkart-db"
+  )
   .then(() => {
     console.log("MongoDB connected");
     importData();
