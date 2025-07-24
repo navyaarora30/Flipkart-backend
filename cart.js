@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Cart = require("../models/Cart"); // ✅ Import the model
+const Cart = require("./models/Cart");
 
 // POST: Add item to cart
 router.post("/cart/add", async (req, res) => {
