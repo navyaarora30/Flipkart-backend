@@ -27,7 +27,7 @@ mongoose
 
 // Routes
 app.use("/auth", authRoutes); // For auth-related routes
-app.use("/cart", cartRoutes); // All cart routes like /cart/add, /cart/:userId/item/:productId
+app.use("/", cartRoutes); // All cart routes like /cart/add, /cart/:userId/item/:productId
 
 // Products route - GET all
 app.get("/products", async (req, res) => {
@@ -57,10 +57,10 @@ app.get("/product/:id", async (req, res) => {
 
 // Root route - health check
 app.get("/", (req, res) => {
-  res.send("✅ Flipkart Backend API is running!");
+  res.send("Flipkart Backend API is running!");
 });
 
 // Start server
 app.listen(8080, () => {
-  console.log("🚀 Server is running on port 8080");
+  console.log("Server is running on port 8080");
 });
