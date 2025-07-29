@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
+const Cart = require("./models/Cart");
+
 
 // Cart Schema
 const Cart = mongoose.model(
@@ -25,6 +26,9 @@ const Cart = mongoose.model(
 );
 
 // 🛒 Add to Cart Route //
+
+
+// POST: Add item to cart
 
 router.post("/cart/add", async (req, res) => {
   try {
@@ -58,7 +62,11 @@ router.post("/cart/add", async (req, res) => {
     cart.updatedAt = new Date();
     await cart.save();
 
+
     res.status(200).json({ success: true, cart });
+
+    res.status(200).json({ message: "Item added to cart", cart });
+
   } catch (err) {
     console.error("Error adding to cart:", err);
     res
@@ -67,7 +75,11 @@ router.post("/cart/add", async (req, res) => {
   }
 });
 
+
 // 🛒 Get All Carts Route (optional/admin) //
+
+
+// GET: All carts
 
 router.get("/carts", async (req, res) => {
   try {
@@ -77,17 +89,26 @@ router.get("/carts", async (req, res) => {
       count: carts.length,
       data: carts,
     });
+
   } catch (error) {
     console.log("Error fetching cart:", error);
+
+  } catch (err) {
+    console.log("Error fetching cart", err);
+
     res.status(500).json({
       success: false,
       message: "Failed to fetch data",
-      error: error.message,
+      error: err.message,
     });
   }
 });
 
+
 // 🗑️ Delete Item from Cart //
+
+
+// DELETE: Item from cart
 
 router.delete("/cart/:userId/item/:productId", async (req, res) => {
   try {
