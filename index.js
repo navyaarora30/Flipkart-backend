@@ -5,22 +5,29 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 
 const Product = require("./models/Product");
-const { router: authRoutes } = require("./auth"); // ✅ from root-level auth.js
+const { router: authRoutes } = require("./auth");
 const cartRoutes = require("./cart");
 const productRoutes = require("./routes/product");
 
 const app = express();
 
-// ✅ Middlewares
-app.use(cors());
+// ✅ CORS configuration
+app.use(
+  cors({
+    origin: "https://flipkart-frontend-ruby.vercel.app", // deployed frontend
+    credentials: true,
+  })
+);
+
+// ✅ Middleware
 app.use(bodyParser.json());
 
-// ✅ Route registrations
+// ✅ Routes
 app.use("/api", authRoutes); // /api/signup & /api/login
 app.use("/api", cartRoutes); // /api/cart/...
 app.use("/api", productRoutes); // /api/products, /api/product/:id
 
-// ✅ Connect to MongoDB
+// ✅ MongoDB connection
 mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
@@ -34,7 +41,7 @@ app.get("/", (req, res) => {
   res.send("🛒 Flipkart Backend API is running!");
 });
 
-// ✅ Start the server
+// ✅ Start server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
