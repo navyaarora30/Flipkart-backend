@@ -20,6 +20,8 @@ const allowedOrigins = [
   "https://flipkart-frontend-navya-aroras-projects.vercel.app",
   "https://flipkart-frontend-533ecvoc-navya-aroras-projects.vercel.app",
   "http://localhost:5173",
+  "https://hoppscotch.io",
+  "chrome-extension://amknoiejhlmhancpahfcfcfhllgkpbld", // ✅ Hoppscotch extension
 ];
 
 app.use(
