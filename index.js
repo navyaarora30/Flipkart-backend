@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
+console.log("MONGO_URL:", process.env.MONGO_URL);
+
 const Product = require("./models/Product");
 const { router: authRoutes } = require("./auth");
 const cartRoutes = require("./cart");
