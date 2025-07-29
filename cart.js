@@ -1,35 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const Cart = require("./models/Cart");
+const Cart = require("./models/Cart"); // ✅ Using the model from models folder
 
-
-// Cart Schema
-const Cart = mongoose.model(
-  "Cart",
-  new mongoose.Schema({
-    userId: String,
-    items: [
-      {
-        productId: String,
-        quantity: Number,
-      },
-    ],
-    status: {
-      type: String,
-      default: "active",
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
-  })
-);
-
-// 🛒 Add to Cart Route //
-
-
-// POST: Add item to cart
-
+// 🛒 Add to Cart Route
 router.post("/cart/add", async (req, res) => {
   try {
     const { productId, quantity = 1, user } = req.body;
@@ -53,20 +26,13 @@ router.post("/cart/add", async (req, res) => {
     if (existingItemIndex > -1) {
       cart.items[existingItemIndex].quantity += parseInt(quantity);
     } else {
-      cart.items.push({
-        productId,
-        quantity: parseInt(quantity),
-      });
+      cart.items.push({ productId, quantity: parseInt(quantity) });
     }
 
     cart.updatedAt = new Date();
     await cart.save();
 
-
-    res.status(200).json({ success: true, cart });
-
     res.status(200).json({ message: "Item added to cart", cart });
-
   } catch (err) {
     console.error("Error adding to cart:", err);
     res
@@ -75,12 +41,7 @@ router.post("/cart/add", async (req, res) => {
   }
 });
 
-
-// 🛒 Get All Carts Route (optional/admin) //
-
-
-// GET: All carts
-
+// 🛒 Get All Carts
 router.get("/carts", async (req, res) => {
   try {
     const carts = await Cart.find({});
@@ -89,13 +50,8 @@ router.get("/carts", async (req, res) => {
       count: carts.length,
       data: carts,
     });
-
-  } catch (error) {
-    console.log("Error fetching cart:", error);
-
   } catch (err) {
     console.log("Error fetching cart", err);
-
     res.status(500).json({
       success: false,
       message: "Failed to fetch data",
@@ -104,12 +60,7 @@ router.get("/carts", async (req, res) => {
   }
 });
 
-
-// 🗑️ Delete Item from Cart //
-
-
-// DELETE: Item from cart
-
+// 🗑️ Delete Item from Cart
 router.delete("/cart/:userId/item/:productId", async (req, res) => {
   try {
     const { userId, productId } = req.params;
