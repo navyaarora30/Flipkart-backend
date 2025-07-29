@@ -20,8 +20,13 @@ const User = mongoose.model("User", userSchema);
 //
 // 🔐 SIGNUP
 //
-router.post("/signup", async (req, res) => {
+router.post("/auth/signup", async (req, res) => {
   const { firstName, lastName, mobile, gender, email, password } = req.body;
+
+  // ✅ Validate required fields
+  if (!firstName || !lastName || !mobile || !gender || !email || !password) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
 
   try {
     const existingUser = await User.findOne({ email });
@@ -30,6 +35,7 @@ router.post("/signup", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = new User({
       firstName,
       lastName,
@@ -61,8 +67,13 @@ router.post("/signup", async (req, res) => {
 //
 // 🔑 LOGIN
 //
-router.post("/login", async (req, res) => {
+router.post("/auth/login", async (req, res) => {
   const { email, password } = req.body;
+
+  // ✅ Validate fields
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required" });
+  }
 
   try {
     const user = await User.findOne({ email });
