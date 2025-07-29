@@ -2,39 +2,58 @@ const mongoose = require("mongoose");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+
 const router = express.Router();
 
-const User = mongoose.model(
-  "User",
-  new mongoose.Schema({ email: String, password: String })
-);
+// Schema
+const userSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+});
 
-//signup router
+const User = mongoose.model("User", userSchema);
+
+// 🔐 Signup Route
 router.post("/auth/signup", async (req, res) => {
   const { email, password } = req.body;
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    return res.status(400).json({ error: "User already exists" });
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    // 🛠️ Fixed bcrypt.hash (you passed an array before!)
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({ email, password: hashedPassword });
+    await user.save();
+
+    const token = jwt.sign({ userId: user._id }, "secret", { expiresIn: "1h" });
+    res.status(200).json({ token });
+  } catch (err) {
+    res.status(500).json({ error: "Signup failed" });
   }
-  const hashedPassword = await bcrypt.hash([password]);
-  const user = new User({ email, password: hashedPassword });
-  await user.save();
-  const token = jwt.sign({ userId: user._id }, "secret", { expiresIn: "1h" });
-  res.status(200).json({ token });
 });
 
-//login route
+// 🔑 Login Route
 router.post("/auth/login", async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email });
-  if (user && (await bcrypt.compare(password, user.password))) {
-    const token = jwt.sign({ userId: user._id }, "secret", { expiresIn: "1h" });
-  } else {
-    res.status(400).json({ error: "Invalid credentials" });
+  try {
+    const user = await User.findOne({ email });
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const token = jwt.sign({ userId: user._id }, "secret", {
+        expiresIn: "1h",
+      });
+      return res.status(200).json({ token });
+    } else {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Login failed" });
   }
 });
 
-//jwt middleware
+// 🔒 JWT Middleware
 function authenticateJWT(req, res, next) {
   const authHeader = req.headers.authorization;
   if (authHeader) {

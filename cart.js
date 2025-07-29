@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
+// Cart Schema
 const Cart = mongoose.model(
   "Cart",
   new mongoose.Schema({
@@ -12,23 +13,39 @@ const Cart = mongoose.model(
         quantity: Number,
       },
     ],
+    status: {
+      type: String,
+      default: "active",
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
   })
 );
+
+// 🛒 Add to Cart Route //
+
 router.post("/cart/add", async (req, res) => {
   try {
     const { productId, quantity = 1, user } = req.body;
+
     if (!productId || !user) {
       return res
         .status(400)
-        .json({ message: "ProductId and user is required" });
+        .json({ message: "ProductId and user are required" });
     }
+
     let cart = await Cart.findOne({ userId: user, status: "active" });
+
     if (!cart) {
-      cart = new Cart({ userId: user, items: [], status: "active" });
+      cart = new Cart({ userId: user, items: [] });
     }
+
     const existingItemIndex = cart.items.findIndex(
-      (item) => items.productId === productId
+      (item) => item.productId === productId
     );
+
     if (existingItemIndex > -1) {
       cart.items[existingItemIndex].quantity += parseInt(quantity);
     } else {
@@ -37,25 +54,31 @@ router.post("/cart/add", async (req, res) => {
         quantity: parseInt(quantity),
       });
     }
-    cart.updateAt = new Date();
+
+    cart.updatedAt = new Date();
     await cart.save();
+
+    res.status(200).json({ success: true, cart });
   } catch (err) {
+    console.error("Error adding to cart:", err);
     res
       .status(500)
-      .json({ error: "Internal server error, item has not been added" });
+      .json({ error: "Internal server error, item not added to cart" });
   }
 });
+
+// 🛒 Get All Carts Route (optional/admin) //
 
 router.get("/carts", async (req, res) => {
   try {
     const carts = await Cart.find({});
     res.status(200).json({
       success: true,
-      count: cart.length,
+      count: carts.length,
       data: carts,
     });
-  } catch (err) {
-    console.log("Error fetching cart", error);
+  } catch (error) {
+    console.log("Error fetching cart:", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch data",
@@ -64,22 +87,28 @@ router.get("/carts", async (req, res) => {
   }
 });
 
-//Delete route
+// 🗑️ Delete Item from Cart //
+
 router.delete("/cart/:userId/item/:productId", async (req, res) => {
   try {
     const { userId, productId } = req.params;
     const cart = await Cart.findOne({ userId, status: "active" });
+
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
+
     const itemIndex = cart.items.findIndex(
       (item) => item.productId === productId
     );
+
     if (itemIndex === -1) {
       return res.status(404).json({ message: "Item not found in cart" });
     }
+
     cart.items.splice(itemIndex, 1);
     await cart.save();
+
     res.status(200).json({
       success: true,
       message: "Item removed from cart",

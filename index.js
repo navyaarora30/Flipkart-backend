@@ -1,52 +1,41 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
 const app = express();
+
+// Middlewares
 app.use(cors());
 app.use(bodyParser.json());
 
-const { router: authRoutes, authenticateJWT } = require("./auth");
+// Route files
+const { router: authRoutes } = require("./auth");
 const cartRoutes = require("./cart");
-app.use(authRoutes);
-app.use(cartRoutes);
+const productRoutes = require("./routes/product"); // 💡 Import product routes
 
+// Use routes
+app.use("/api", authRoutes); // /api/auth/signup, /api/auth/login
+app.use("/api", cartRoutes); // /api/cart/add, /api/cart/:userId/item/:productId
+app.use("/api", productRoutes); // /api/products, /api/products/:id
+
+// MongoDB connection
 mongoose
-  .connect(
-    "mongodb+srv://NavyaArora:deploy30Project09Mongo@cluster0.tpmk9y3.mongodb.net/flipkart-db"
-  )
+  .connect(process.env.MONGO_URL)
   .then(() => {
-    console.log("MongoDB connected");
+    console.log("✅ MongoDB connected");
   })
   .catch((err) => {
-    console.log("MongoDB connection error:", err);
+    console.error("❌ MongoDB connection error:", err);
   });
 
-app.get("/products", async (req, res) => {
-  try {
-    const products = await Product.find();
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ error: "There is internal server error" });
-  }
+// Default route (optional)
+app.get("/", (req, res) => {
+  res.send("Flipkart Clone Backend is Running");
 });
 
-app.get("/product/:id", async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({
-        message: "The items that you were searching for does not exists",
-      });
-    } else {
-      res.json(product);
-    }
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
+// Start server
 app.listen(8080, () => {
-  console.log("Server is running");
+  console.log("🚀 Server is running on http://localhost:8080");
 });
