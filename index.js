@@ -11,10 +11,24 @@ const productRoutes = require("./routes/product");
 
 const app = express();
 
-// ✅ CORS configuration (no credentials needed for token-based auth)
+// ✅ CORS configuration for all Vercel frontend deployments
+const allowedOrigins = [
+  "https://flipkart-frontend-ruby.vercel.app",
+  "https://flipkart-frontend-git-main-navya-aroras-projects.vercel.app",
+  "https://flipkart-frontend-navya-aroras-projects.vercel.app",
+  "https://flipkart-frontend-533ecvoc-navya-aroras-projects.vercel.app",
+  "http://localhost:5173",
+];
+
 app.use(
   cors({
-    origin: "https://flipkart-frontend-ruby.vercel.app", // your deployed frontend
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS: " + origin));
+      }
+    },
   })
 );
 
@@ -22,7 +36,7 @@ app.use(
 app.use(bodyParser.json());
 
 // ✅ Routes
-app.use("/api", authRoutes); // /api/auth/signup & /api/auth/login
+app.use("/api", authRoutes); // /api/auth/signup, /api/auth/login
 app.use("/api", cartRoutes); // /api/cart/...
 app.use("/api", productRoutes); // /api/products, /api/product/:id
 
@@ -40,7 +54,7 @@ app.get("/", (req, res) => {
   res.send("🛒 Flipkart Backend API is running!");
 });
 
-// ✅ Start server
+// ✅ Start the server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
