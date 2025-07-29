@@ -1,30 +1,24 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const Product = require("./models/Product");
 const fs = require("fs");
 
-// 1. Connect to MongoDB
 mongoose
-  .connect(
-    "mongodb+srv://NavyaArora:deploy30Project09Mongo@cluster0.tpmk9y3.mongodb.net/flipkart-db"
-  )
-  .then(() => {
-    console.log("MongoDB connected");
-    importData();
-  })
-  .catch((err) => console.log("Connection Error:", err));
+  .connect(process.env.MONGO_URL)
+  .then(async () => {
+    console.log("✅ Connected to MongoDB");
 
-// 2. Read data from JSON file
-const rawData = fs.readFileSync("./data.json");
-const products = JSON.parse(rawData).products;
+    const rawData = fs.readFileSync("data.json");
+    const jsonData = JSON.parse(rawData);
 
-// 3. Insert into MongoDB
-async function importData() {
-  try {
+    const products = jsonData.products || jsonData;
+
+    await Product.deleteMany(); // optional: clear existing
     await Product.insertMany(products);
-    console.log("Data imported successfully");
-    process.exit(); // exit the script
-  } catch (error) {
-    console.error("Error importing data:", error);
+    console.log("✅ Data imported successfully");
+    process.exit();
+  })
+  .catch((err) => {
+    console.error("❌ Error importing data:", err);
     process.exit(1);
-  }
-}
+  });
