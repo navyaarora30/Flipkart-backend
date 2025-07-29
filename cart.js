@@ -2,19 +2,48 @@ const express = require("express");
 const router = express.Router();
 const Cart = require("./models/Cart");
 
+
+// Cart Schema
+const Cart = mongoose.model(
+  "Cart",
+  new mongoose.Schema({
+    userId: String,
+    items: [
+      {
+        productId: String,
+        quantity: Number,
+      },
+    ],
+    status: {
+      type: String,
+      default: "active",
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  })
+);
+
+// 🛒 Add to Cart Route //
+
+
 // POST: Add item to cart
+
 router.post("/cart/add", async (req, res) => {
   try {
     const { productId, quantity = 1, user } = req.body;
+
     if (!productId || !user) {
       return res
         .status(400)
-        .json({ message: "ProductId and user is required" });
+        .json({ message: "ProductId and user are required" });
     }
 
     let cart = await Cart.findOne({ userId: user, status: "active" });
+
     if (!cart) {
-      cart = new Cart({ userId: user, items: [], status: "active" });
+      cart = new Cart({ userId: user, items: [] });
     }
 
     const existingItemIndex = cart.items.findIndex(
@@ -32,15 +61,26 @@ router.post("/cart/add", async (req, res) => {
 
     cart.updatedAt = new Date();
     await cart.save();
+
+
+    res.status(200).json({ success: true, cart });
+
     res.status(200).json({ message: "Item added to cart", cart });
+
   } catch (err) {
+    console.error("Error adding to cart:", err);
     res
       .status(500)
-      .json({ error: "Internal server error, item has not been added" });
+      .json({ error: "Internal server error, item not added to cart" });
   }
 });
 
+
+// 🛒 Get All Carts Route (optional/admin) //
+
+
 // GET: All carts
+
 router.get("/carts", async (req, res) => {
   try {
     const carts = await Cart.find({});
@@ -49,8 +89,13 @@ router.get("/carts", async (req, res) => {
       count: carts.length,
       data: carts,
     });
+
+  } catch (error) {
+    console.log("Error fetching cart:", error);
+
   } catch (err) {
     console.log("Error fetching cart", err);
+
     res.status(500).json({
       success: false,
       message: "Failed to fetch data",
@@ -59,7 +104,12 @@ router.get("/carts", async (req, res) => {
   }
 });
 
+
+// 🗑️ Delete Item from Cart //
+
+
 // DELETE: Item from cart
+
 router.delete("/cart/:userId/item/:productId", async (req, res) => {
   try {
     const { userId, productId } = req.params;

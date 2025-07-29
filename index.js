@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -13,15 +14,40 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+
+// Route files
+const { router: authRoutes } = require("./auth");
+const cartRoutes = require("./cart");
+const productRoutes = require("./routes/product"); // 💡 Import product routes
+
+// Use routes
+app.use("/api", authRoutes); // /api/auth/signup, /api/auth/login
+app.use("/api", cartRoutes); // /api/cart/add, /api/cart/:userId/item/:productId
+app.use("/api", productRoutes); // /api/products, /api/products/:id
+
+// MongoDB connection
+
 // Connect MongoDB
+
 mongoose
-  .connect(
-    "mongodb+srv://NavyaArora:deploy30Project09Mongo@cluster0.tpmk9y3.mongodb.net/flipkart-db"
-  )
+  .connect(process.env.MONGO_URL)
   .then(() => {
     console.log("✅ MongoDB connected");
   })
   .catch((err) => {
+
+    console.error("❌ MongoDB connection error:", err);
+  });
+
+// Default route (optional)
+app.get("/", (req, res) => {
+  res.send("Flipkart Clone Backend is Running");
+});
+
+// Start server
+app.listen(8080, () => {
+  console.log("🚀 Server is running on http://localhost:8080");
+
     console.log("❌ MongoDB connection error:", err);
   });
 
@@ -63,4 +89,5 @@ app.get("/", (req, res) => {
 // Start server
 app.listen(8080, () => {
   console.log("Server is running on port 8080");
+
 });
