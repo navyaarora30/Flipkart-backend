@@ -11,11 +11,10 @@ const productRoutes = require("./routes/product");
 
 const app = express();
 
-// ✅ CORS configuration
+// ✅ CORS configuration (no credentials needed for token-based auth)
 app.use(
   cors({
-    origin: "https://flipkart-frontend-ruby.vercel.app", // deployed frontend
-    credentials: true,
+    origin: "https://flipkart-frontend-ruby.vercel.app", // your deployed frontend
   })
 );
 
@@ -23,7 +22,7 @@ app.use(
 app.use(bodyParser.json());
 
 // ✅ Routes
-app.use("/api", authRoutes); // /api/signup & /api/login
+app.use("/api", authRoutes); // /api/auth/signup & /api/auth/login
 app.use("/api", cartRoutes); // /api/cart/...
 app.use("/api", productRoutes); // /api/products, /api/product/:id
 
